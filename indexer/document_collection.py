@@ -1,16 +1,18 @@
 import os
+from pathlib import Path
 from dataclasses import dataclass
 
 @dataclass
 class Document:
     identifier: int
-    path: str
+    path: Path
 
 @dataclass
 class DocumentCollection:
-    directory: str
+    directory: Path
 
     def __iter__(self):
         for i, directoryEntry in enumerate(os.scandir(self.directory)):
             if not directoryEntry.is_file(): continue
-            yield Document(i, directoryEntry.path)
+            if directoryEntry.name == ".index": continue
+            yield Document(i, Path(directoryEntry.path))

@@ -1,8 +1,8 @@
 import typing
 from io import StringIO
-from scanner import Scanner
-from stop_list import StopList
-from normalizer import Normalizer
+from . scanner import Scanner
+from . stop_list import StopList
+from . normalizer import Normalizer
 from dataclasses import dataclass, field
 
 @dataclass
@@ -17,7 +17,7 @@ class Tokenizer:
         return self
 
     def __iter__(self):
-        for token in self.tokenizer(file):
+        for token in self.scanner(self.text):
             term = self.normalizer(token)
-            if term in self.stop_list: continue
+            if term in self.stopList: continue
             yield term
