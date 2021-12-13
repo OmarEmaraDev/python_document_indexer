@@ -55,7 +55,6 @@ class PositionalIndex:
         self.dictionary = OrderedDict()
         for document in self.documentCollection:
             self.indexDocument(document)
-            break
 
     def indexDocument(self, document):
         with open(document.path) as file:
