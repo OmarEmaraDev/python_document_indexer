@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Document:
-    identifier: int
+    id: int
     path: Path
 
 @dataclass

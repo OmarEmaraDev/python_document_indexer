@@ -14,8 +14,12 @@ class Token:
 @dataclass
 class Posting:
     documentID: int
-    frequency: int
-    positions: list[int]
+    frequency: int = 0
+    positions: list[int] = field(default_factory = lambda: [])
+
+    def update(self, token):
+        self.frequency += 1
+        self.positions.append(token.position)
 
 @dataclass
 class PostingsList:
@@ -24,7 +28,13 @@ class PostingsList:
     postings: list[Posting] = field(default_factory = lambda: [])
 
     def update(self, token):
-        raise NotImplementedError
+        self.frequency += 1
+        posting = next((posting for posting in self.postings
+            if posting.documentID == token.document.id), None)
+        if not posting:
+            posting = Posting(token.document.id)
+            self.postings.append(posting)
+        posting.update(token)
 
 @dataclass
 class PositionalIndex:
