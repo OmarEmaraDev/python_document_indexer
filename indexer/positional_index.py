@@ -102,8 +102,8 @@ class PositionalIndex:
     # Load/Save
     ###########
 
-    def save(self):
-        with open(self.documentCollection.directory / ".index", "wb") as file:
+    def save(self, fileName):
+        with open(self.documentCollection.directory / fileName, "wb") as file:
             # Avoid pickling the runtime text fields.
             del self.tokenizer.text
             del self.tokenizer.scanner.text
@@ -111,8 +111,8 @@ class PositionalIndex:
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
 
     @classmethod
-    def load(cls, directory):
-        with open(directory / ".index", "rb") as file:
+    def load(cls, path):
+        with open(path, "rb") as file:
             return pickle.load(file)
 
     ######

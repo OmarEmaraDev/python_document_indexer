@@ -19,11 +19,28 @@ class TermDocumentMatrix:
         self.computeMatrix()
 
     def computeMatrix(self):
-        raise NotImplementedError
+        pass
 
     #######
     # Query
     #######
 
     def computeSimilarity(self, phrase, document):
-        raise NotImplementedError
+        pass
+
+    ###########
+    # Load/Save
+    ###########
+
+    def save(self, fileName):
+        with open(self.documentCollection.directory / fileName, "wb") as file:
+            # Avoid pickling the runtime text fields.
+            del self.tokenizer.text
+            del self.tokenizer.scanner.text
+
+            pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
+
+    @classmethod
+    def load(cls, path):
+        with open(path, "rb") as file:
+            return pickle.load(file)
