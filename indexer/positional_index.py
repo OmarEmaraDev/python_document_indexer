@@ -11,11 +11,11 @@ class Token:
     position: int
     document: Document
 
-@dataclass
+@dataclass(order = True)
 class Posting:
-    documentID: int
-    frequency: int = 0
-    positions: list[int] = field(default_factory = lambda: [])
+    document: Document
+    frequency: int = field(default = 0, compare = False)
+    positions: list[int] = field(default_factory = lambda: [], compare = False)
 
     def update(self, token):
         self.frequency += 1
@@ -29,12 +29,15 @@ class PostingsList:
 
     def update(self, token):
         self.frequency += 1
-        posting = next((posting for posting in self.postings
-            if posting.documentID == token.document.id), None)
-        if not posting:
-            posting = Posting(token.document.id)
+        posting = Posting(token.document)
+        if posting in self.postings:
+            posting = self.postings[self.postings.index(posting)]
+        else:
             self.postings.append(posting)
         posting.update(token)
+
+    def sort(self):
+        self.postings.sort()
 
 @dataclass
 class PositionalIndex:
@@ -50,6 +53,7 @@ class PositionalIndex:
         self.tokenizer = tokenizer
         self.documentCollection = documentCollection
         self.computeDictionary()
+        self.sortPostingsLists()
 
     def computeDictionary(self):
         self.dictionary = OrderedDict()
@@ -66,6 +70,10 @@ class PositionalIndex:
         if not postingsList: postingsList = PostingsList(token.term)
         self.dictionary[token.term] = postingsList
         postingsList.update(token)
+
+    def sortPostingsLists(self):
+        for postingsList in self.dictionary.values():
+            postingsList.sort()
 
     #######
     # Query

@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-@dataclass
+@dataclass(order = True)
 class Document:
     id: int
-    path: Path
+    path: Path = field(compare = False)
 
 @dataclass
 class DocumentCollection:
