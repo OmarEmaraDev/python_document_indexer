@@ -96,7 +96,52 @@ class PositionalIndex:
     def phraseQuery(self, phrase):
         tokens = self.tokenizer(StringIO(phrase))
         postingsLists = [self.dictionary[token] for token in tokens]
-        raise NotImplementedError
+        setOfDocs = list()
+        answer = set()
+        for i in range(len(postingsLists) - 1):
+            plist = postingsLists[i: i+2]
+            setOfDocs.append(set(self.positionalIntersect(plist[0], plist[1])))
+
+        if setOfDocs != []:
+            answer = set(setOfDocs[0])
+            for s in setOfDocs:
+                answer = answer & s
+        return answer
+
+
+    def positionalIntersect(self, posting1, posting2):
+        answer = []
+
+        list1 = iter(posting1.postings)
+        list2 = iter(posting2.postings)
+
+        for p1, p2 in zip(list1, list2):
+            if p1.document.id == p2.document.id:
+                l = []
+                positions1 = iter(p1.positions)
+                positions2 = iter(p2.positions)
+
+                for pp1 in positions1:
+                    for pp2 in positions2:
+                        if abs(pp1 - pp2) <= 1:
+                            l.append(pp2)
+                        elif pp2 > pp1:
+                            break
+                        next(positions2, None)
+
+                    while l != [] and abs(l[0] - pp1) > 1:
+                        l.remove(l[0])
+                    for ps in l:
+                        answer.append(p1.document.id)
+                    next(positions1, None)
+                next(list1, None)
+                next(list2, None)
+            elif p1.document.id < p2.document.id:
+                next(list1, None)
+            else:
+                next(list2, None)
+        return answer
+
 
     ###########
     # Load/Save

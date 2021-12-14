@@ -32,7 +32,8 @@ def index(arguments):
     #termDocumentMatrix.save(MATRIX_NAME)
 
 def query(arguments):
-    pass
+    positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
+    positionalIndex.phraseQuery(arguments.phrase)
 
 def rank(arguments):
     pass
