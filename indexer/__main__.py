@@ -25,14 +25,14 @@ def index(arguments):
 def query(arguments):
     pass
 
-def validateDisplay(arguments):
+def validateDump(arguments):
     if not (arguments.collection / ".index").exists():
         printErrorAndExit("No index exists. Run 'indexer index' first!")
 
-def display(arguments):
-    validateDisplay(arguments)
+def dump(arguments):
+    validateDump(arguments)
     positionalIndex = PositionalIndex.load(arguments.collection)
-    print(positionalIndex)
+    positionalIndex.dump()
 
 def parseArguments():
     parser = ArgumentParser(prog = "indexer")
@@ -58,12 +58,12 @@ def parseArguments():
         metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
     queryParser.set_defaults(handler = query)
 
-    displayHelp = "Display the positional index for collection."
-    displayParser = subParsers.add_parser("display",
-        help = displayHelp, description = displayHelp)
-    displayParser.add_argument("collection", type = Path, nargs = "?",
+    dumpHelp = "Dump the positional index for collection."
+    dumpParser = subParsers.add_parser("dump",
+        help = dumpHelp, description = dumpHelp)
+    dumpParser.add_argument("collection", type = Path, nargs = "?",
         metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
-    displayParser.set_defaults(handler = display)
+    dumpParser.set_defaults(handler = dump)
 
     return parser.parse_args()
 

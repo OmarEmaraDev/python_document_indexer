@@ -21,6 +21,13 @@ class Posting:
         self.frequency += 1
         self.positions.append(token.position)
 
+    def dump(self, indentation = 0):
+        print(" " * indentation, end = "")
+        documentPath = repr(self.document.path.as_posix())
+        print(f"Document: {documentPath}, Frequency: {self.frequency}")
+        print(" " * (indentation + 2), end = "")
+        print(self.positions)
+
 @dataclass
 class PostingsList:
     term: str
@@ -39,10 +46,17 @@ class PostingsList:
     def sort(self):
         self.postings.sort()
 
+    def dump(self, indentation = 0):
+        print(" " * indentation, end = "")
+        print(f"Term: {repr(self.term)}, Frequency: {self.frequency}")
+        for posting in self.postings:
+            posting.dump(indentation + 2)
+
+
 @dataclass
 class PositionalIndex:
-    tokenizer: Tokenizer = field(repr = False)
-    documentCollection: DocumentCollection  = field(repr = False)
+    tokenizer: Tokenizer
+    documentCollection: DocumentCollection
     dictionary: OrderedDict[str, PostingsList]
 
     ##############
@@ -100,3 +114,11 @@ class PositionalIndex:
     def load(cls, directory):
         with open(directory / ".index", "rb") as file:
             return pickle.load(file)
+
+    ######
+    # Dump
+    ######
+
+    def dump(self):
+        for postingsList in self.dictionary.values():
+            postingsList.dump()
