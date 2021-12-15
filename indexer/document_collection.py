@@ -12,7 +12,10 @@ class DocumentCollection:
     directory: Path
 
     def __iter__(self):
-        for i, directoryEntry in enumerate(os.scandir(self.directory)):
+        entries = os.scandir(self.directory)
+        txtFilter = lambda e: e.name.endswith(".txt")
+        filteredEntries = filter(txtFilter, entries)
+        sortedEntries = sorted(filteredEntries, key = lambda e: e.name)
+        for i, directoryEntry in enumerate(sortedEntries):
             if not directoryEntry.is_file(): continue
-            if directoryEntry.name == ".index": continue
             yield Document(i, Path(directoryEntry.path))
