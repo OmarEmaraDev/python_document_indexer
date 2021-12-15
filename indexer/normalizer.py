@@ -10,4 +10,4 @@ class Normalizer(ABC):
 
 class LowerCaseNormalizer(Normalizer):
     def __call__(self, token):
-        raise NotImplementedError
+        return token.lower()

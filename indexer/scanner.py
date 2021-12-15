@@ -1,5 +1,6 @@
 import typing
 from io import StringIO
+from functools import partial
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
@@ -17,4 +18,9 @@ class Scanner(ABC):
 
 class WhiteSpaceScanner(Scanner):
     def __iter__(self):
-        raise NotImplementedError
+        token = ""
+        for character in iter(partial(self.text.read, 1), ""):
+            isReal = character.isalpha() or character == "'"
+            if not isReal and token: yield token; token = ""
+            if isReal: token += character
+        if token: yield token

@@ -6,5 +6,8 @@ class StopList(ABC):
         raise NotImplementedError
 
 class ReutersRCV1StopList(StopList):
+    stopList = set(("a", "an", "and", "are", "as", "at", "be", "by", "for",
+                   "from", "has", "he", "in", "is", "it", "its", "of", "on",
+                   "that", "the", "to", "was", "were", "will", "with"))
     def __contains__(self, word):
-        raise NotImplementedError
+        return word in self.stopList
