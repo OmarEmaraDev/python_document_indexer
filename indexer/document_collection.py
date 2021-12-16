@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dataclasses import dataclass, field
 
-@dataclass(order = True)
+@dataclass(order = True, frozen = True)
 class Document:
     id: int
     path: Path = field(compare = False)

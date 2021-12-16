@@ -33,7 +33,8 @@ def index(arguments):
 
 def query(arguments):
     positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
-    positionalIndex.phraseQuery(arguments.phrase)
+    for match in positionalIndex.phraseQuery(arguments.phrase):
+        print(match)
 
 def rank(arguments):
     pass

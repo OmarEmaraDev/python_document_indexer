@@ -1,10 +1,14 @@
 import pickle
-from . utilities import pairwise
 from io import StringIO
 from . tokenizer import Tokenizer
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from . document_collection import DocumentCollection, Document
+
+@dataclass(frozen = True)
+class Match:
+    position: int
+    document: Document
 
 @dataclass
 class Token:
@@ -21,6 +25,25 @@ class Posting:
     def update(self, token):
         self.frequency += 1
         self.positions.append(token.position)
+
+    def forwardIntersect(self, targetPosting, proximity):
+        answer = set()
+        positionIndex = 0
+        targetPositionIndex = 0
+        positions = self.positions
+        targetPositions = targetPosting.positions
+        while positionIndex != len(positions) and targetPositionIndex != len(targetPositions):
+            position = positions[positionIndex]
+            targetPosition = targetPositions[targetPositionIndex]
+            if targetPosition - position == proximity:
+                answer.add(Match(position, self.document))
+                positionIndex += 1
+                targetPositionIndex += 1
+            elif targetPosition - position > proximity:
+                positionIndex += 1
+            else:
+                targetPositionIndex += 1
+        return answer
 
     def dump(self, indentation = 0):
         print(" " * indentation, end = "")
@@ -46,6 +69,32 @@ class PostingsList:
 
     def sort(self):
         self.postings.sort()
+
+    def forwardIntersect(self, targetPostingsList, proximity):
+        answer = set()
+        postingIndex = 0
+        targetPostingIndex = 0
+        postings = self.postings
+        targetPostings = targetPostingsList.postings
+        while postingIndex != len(postings) and targetPostingIndex != len(targetPostings):
+            posting = postings[postingIndex]
+            targetPosting = targetPostings[targetPostingIndex]
+            if posting.document.id == targetPosting.document.id:
+                answer |= posting.forwardIntersect(targetPosting, proximity)
+                postingIndex += 1
+                targetPostingIndex += 1
+            elif posting.document.id > targetPosting.document.id:
+                targetPostingIndex += 1
+            else:
+                postingIndex += 1
+        return answer
+
+    def getMatchesForAll(self):
+        result = set()
+        for posting in self.postings:
+            for position in posting.positions:
+                result.add(Match(position, posting.document))
+        return result
 
     def dump(self, indentation = 0):
         print(" " * indentation, end = "")
@@ -93,48 +142,19 @@ class PositionalIndex:
     #######
     # Query
     #######
-    
+
     def phraseQuery(self, phrase):
         tokens = self.tokenizer(StringIO(phrase))
         postingsLists = [self.dictionary[token] for token in tokens]
-        
-        biWordMatches = (self.positionalIntersect(x, y) for x, y in pairwise(postingsLists))
-        return set.intersection(*biWordMatches)
+        if len(postingsLists) == 0: return set()
+        firstPostingsList = postingsLists[0]
+        if len(postingsLists) == 1: return firstPostingsList.getMatchesForAll()
 
+        matches = []
+        for i, postingsList in enumerate(postingsLists[1:], 1):
+            matches.append(firstPostingsList.forwardIntersect(postingsList, i))
+        return set.intersection(*matches)
 
-    def positionalIntersect(self, posting1, posting2):
-        answer = set()
-        k = 1
-        p1 = posting1.postings
-        p2 = posting2.postings
-        postingIndex = targetPostingIndex = 0
-
-        while postingIndex != len(p1) and targetPostingIndex != len(p2):
-
-            if p1[postingIndex].document.id == p2[targetPostingIndex].document.id:
-                pp1 = p1[postingIndex].positions
-                pp2 = p2[targetPostingIndex].positions
-                positionIndex = targetPositionIndex = 0
-
-                while positionIndex != len(pp1) and targetPositionIndex != len(pp2):
-                    if pp2[targetPositionIndex] - pp1[positionIndex] == k:
-                        answer.add(p1[postingIndex].document.id)
-                        positionIndex += 1
-                        targetPositionIndex += 1
-                    elif pp2[targetPositionIndex] - pp1[positionIndex] > k:
-                        positionIndex += 1
-                    else:
-                        targetPositionIndex += 1
-
-                postingIndex += 1
-                targetPostingIndex += 1
-
-            elif p1[postingIndex].document.id > p2[targetPostingIndex].document.id:
-                targetPostingIndex += 1
-            else:
-                postingIndex += 1
-        return answer
-        
     ###########
     # Load/Save
     ###########
