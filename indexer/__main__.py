@@ -28,8 +28,9 @@ def index(arguments):
     positionalIndex = PositionalIndex(tokenizer, documentCollection)
     positionalIndex.save(INDEX_NAME)
 
-    #termDocumentMatrix = TermDocumentMatrix(tokenizer, documentCollection)
-    #termDocumentMatrix.save(MATRIX_NAME)
+    termDocumentMatrix = TermDocumentMatrix(
+        tokenizer, documentCollection, positionalIndex)
+    termDocumentMatrix.save(MATRIX_NAME)
 
 def query(arguments):
     positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)

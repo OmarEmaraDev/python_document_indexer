@@ -1,3 +1,4 @@
+import pickle
 from . tokenizer import Tokenizer
 from dataclasses import dataclass
 from scipy.sparse import spmatrix
@@ -13,12 +14,12 @@ class TermDocumentMatrix:
     # Construction
     ##############
 
-    def __init__(self, tokenizer, documentCollection):
+    def __init__(self, tokenizer, documentCollection, positionalIndex):
         self.tokenizer = tokenizer
         self.documentCollection = documentCollection
-        self.computeMatrix()
+        self.computeMatrix(positionalIndex)
 
-    def computeMatrix(self):
+    def computeMatrix(self, positionalIndex):
         pass
 
     #######
@@ -35,8 +36,8 @@ class TermDocumentMatrix:
     def save(self, fileName):
         with open(self.documentCollection.directory / fileName, "wb") as file:
             # Avoid pickling the runtime text fields.
-            del self.tokenizer.text
-            del self.tokenizer.scanner.text
+            if hasattr(self.tokenizer, "text"): del self.tokenizer.text
+            if hasattr(self.tokenizer.scanner, "text"): del self.tokenizer.scanner.text
 
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
 
