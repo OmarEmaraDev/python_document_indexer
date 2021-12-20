@@ -139,3 +139,5 @@ cython_debug/
 
 sample_collection/.index
 sample_collection/.matrix
+test_collection/.index
+test_collection/.matrix
