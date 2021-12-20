@@ -106,7 +106,7 @@ class PostingsList:
 @dataclass
 class PositionalIndex:
     tokenizer: Tokenizer
-    numberOfDocuments: int = 0
+    numberOfDocuments: int
     documentCollection: DocumentCollection
     dictionary: OrderedDict[str, PostingsList]
 
@@ -119,6 +119,7 @@ class PositionalIndex:
         self.documentCollection = documentCollection
         self.computeDictionary()
         self.sortPostingsLists()
+        self.sortDictionary()
 
     def computeDictionary(self):
         self.numberOfDocuments = 0
@@ -141,6 +142,9 @@ class PositionalIndex:
     def sortPostingsLists(self):
         for postingsList in self.dictionary.values():
             postingsList.sort()
+
+    def sortDictionary(self):
+        self.dictionary = OrderedDict(sorted(self.dictionary.items()))
 
     #######
     # Query
