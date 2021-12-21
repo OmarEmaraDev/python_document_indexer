@@ -20,7 +20,7 @@ def printErrorAndExit(error, exitCode = 1):
 
 def index(arguments):
     scanner = WhiteSpaceScanner()
-    stopList = ReutersRCV1StopList()
+    stopList = ReutersRCV1StopList() if not arguments.noStopWords else None
     normalizer = LowerCaseNormalizer()
     tokenizer = Tokenizer(scanner, stopList, normalizer)
     documentCollection = DocumentCollection(arguments.collection)
@@ -68,6 +68,8 @@ def parseArguments():
     indexHelp = "Compute the index and term document matrix for collection."
     indexParser = subParsers.add_parser("index",
         help = indexHelp, description = indexHelp)
+    indexParser.add_argument("--no-stop-words", "-n", action = "store_true",
+        dest = "noStopWords", help = "Do not remove stop words.")
     indexParser.add_argument("collection", type = Path, nargs = "?",
         metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
     indexParser.set_defaults(handler = index)

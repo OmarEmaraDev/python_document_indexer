@@ -19,5 +19,5 @@ class Tokenizer:
     def __iter__(self):
         for token in self.scanner(self.text):
             term = self.normalizer(token)
-            if term in self.stopList: continue
+            if self.stopList is not None and term in self.stopList: continue
             yield term
