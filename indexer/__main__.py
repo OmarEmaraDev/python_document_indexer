@@ -47,8 +47,12 @@ def validateDump(arguments):
 
 def dump(arguments):
     validateDump(arguments)
+
     positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
     positionalIndex.dump()
+
+    matrix = TermDocumentMatrix.load(arguments.collection / MATRIX_NAME)
+    matrix.dump()
 
 def parseArguments():
     parser = ArgumentParser(prog = PROGRAM_NAME)
