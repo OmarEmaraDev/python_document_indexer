@@ -32,24 +32,30 @@ def index(arguments):
         tokenizer, documentCollection, positionalIndex)
     termDocumentMatrix.save(MATRIX_NAME)
 
-def query(arguments):
-    positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
-    for match in positionalIndex.phraseQuery(arguments.phrase):
-        print(match)
-
-def validateDump(arguments, fileName):
+def validateFiles(arguments, fileName):
     if not (arguments.collection / fileName).exists():
         printErrorAndExit(f"No {fileName} file exists."
             f" Run '{PROGRAM_NAME} index {str(arguments.collection)}' first!")
 
-def dump(arguments):
+def query(arguments):
+    validateFiles(arguments, INDEX_NAME)
+    validateFiles(arguments, MATRIX_NAME)
+    positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
+    matrix = TermDocumentMatrix.load(arguments.collection / MATRIX_NAME)
+    sortKey = lambda match: matrix.computeSimilarity(
+        arguments.phrase, match.document)
+    matches = sorted(positionalIndex.phraseQuery(arguments.phrase),
+        key = sortKey, reverse = True)
+    for match in matches:
+        print(match)
 
+def dump(arguments):
     if arguments.structure == "index":
-        validateDump(arguments, INDEX_NAME)
+        validateFiles(arguments, INDEX_NAME)
         positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
         positionalIndex.dump()
     elif arguments.structure == "matrix":
-        validateDump(arguments, MATRIX_NAME)
+        validateFiles(arguments, MATRIX_NAME)
         matrix = TermDocumentMatrix.load(arguments.collection / MATRIX_NAME)
         matrix.dump()
 

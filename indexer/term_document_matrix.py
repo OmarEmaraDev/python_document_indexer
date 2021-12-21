@@ -1,9 +1,10 @@
 import numpy
 import pickle
-from math import log10
+from io import StringIO
+from math import log10, sqrt
 from . tokenizer import Tokenizer
 from dataclasses import dataclass
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 from scipy.sparse import spmatrix, lil_matrix
 from . document_collection import DocumentCollection
 
@@ -54,7 +55,16 @@ class TermDocumentMatrix:
     #######
 
     def computeSimilarity(self, phrase, document):
-        pass
+        vector = lil_matrix((len(self.termInfos), 1))
+        termFrequencies = Counter(self.tokenizer(StringIO(phrase)))
+        for term in self.tokenizer(StringIO(phrase)):
+            termInfo = self.termInfos[term]
+            weight = termInfo.inverseDocumentFrequency * termFrequencies[term]
+            vector[termInfo.index, 0] = weight
+        vector = vector.tocsc()
+        dotProduct = self.matrix.getcol(document.id).multiply(vector).sum()
+        vectorLength = sqrt(vector.multiply(vector).sum())
+        return dotProduct / vectorLength if vectorLength != 0 else 0
 
     ###########
     # Load/Save
