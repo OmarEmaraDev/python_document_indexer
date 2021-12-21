@@ -21,23 +21,23 @@ Actions:
 
   ACTION
     index     Compute the index and term document matrix for collection.
-    query     Query the documents that includes the input phrase.
-    rank      Rank the documents according to similarity to the input phrase.
+    query     Query the documents that includes the input phrase. And sort based on cosine similarity.
     dump      Dump the positional index for collection.
 ```
 
 Index:
 
 ```
-usage: python -m indexer index [-h] [COLLECTION]
+usage: python -m indexer index [-h] [--no-stop-words] [COLLECTION]
 
 Compute the index and term document matrix for collection.
 
 positional arguments:
-  COLLECTION  The path to the directory containing the document collection. Defaults to the curent working directory.
+  COLLECTION           The path to the directory containing the document collection. Defaults to the curent working directory.
 
 options:
-  -h, --help  show this help message and exit
+  -h, --help           show this help message and exit
+  --no-stop-words, -n  Do not remove stop words.
 ```
 
 Query:
@@ -55,33 +55,19 @@ options:
   -h, --help  show this help message and exit
 ```
 
-Rank:
-
-```
-usage: python -m indexer rank [-h] PHRASE [COLLECTION]
-
-Rank the documents according to similarity to the input phrase.
-
-positional arguments:
-  PHRASE      The phrase to rank documents against.
-  COLLECTION  The path to the directory containing the document collection. Defaults to the curent working directory.
-
-options:
-  -h, --help  show this help message and exit
-```
-
 Dump:
 
 ```
-usage: python -m indexer dump [-h] [COLLECTION]
+usage: python -m indexer dump [-h] {index,matrix} [COLLECTION]
 
 Dump the positional index for collection.
 
 positional arguments:
-  COLLECTION  The path to the directory containing the document collection. Defaults to the curent working directory.
+  {index,matrix}  Which structure to dump.
+  COLLECTION      The path to the directory containing the document collection. Defaults to the curent working directory.
 
 options:
-  -h, --help  show this help message and exit
+  -h, --help      show this help message and exit
 ```
 
 # Test

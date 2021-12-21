@@ -37,22 +37,21 @@ def query(arguments):
     for match in positionalIndex.phraseQuery(arguments.phrase):
         print(match)
 
-def rank(arguments):
-    pass
-
-def validateDump(arguments):
-    if not (arguments.collection / INDEX_NAME).exists():
-        printErrorAndExit("No index exists."
+def validateDump(arguments, fileName):
+    if not (arguments.collection / fileName).exists():
+        printErrorAndExit(f"No {fileName} file exists."
             f" Run '{PROGRAM_NAME} index {str(arguments.collection)}' first!")
 
 def dump(arguments):
-    validateDump(arguments)
 
-    positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
-    positionalIndex.dump()
-
-    matrix = TermDocumentMatrix.load(arguments.collection / MATRIX_NAME)
-    matrix.dump()
+    if arguments.structure == "index":
+        validateDump(arguments, INDEX_NAME)
+        positionalIndex = PositionalIndex.load(arguments.collection / INDEX_NAME)
+        positionalIndex.dump()
+    elif arguments.structure == "matrix":
+        validateDump(arguments, MATRIX_NAME)
+        matrix = TermDocumentMatrix.load(arguments.collection / MATRIX_NAME)
+        matrix.dump()
 
 def parseArguments():
     parser = ArgumentParser(prog = PROGRAM_NAME)
@@ -74,7 +73,10 @@ def parseArguments():
         metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
     indexParser.set_defaults(handler = index)
 
-    queryHelp = "Query the documents that includes the input phrase."
+    queryHelp = (
+        "Query the documents that includes the input phrase."
+        " And sort based on cosine similarity."
+    )
     queryParser = subParsers.add_parser("query",
         help = queryHelp, description = queryHelp)
     queryParser.add_argument("phrase", metavar = "PHRASE",
@@ -83,18 +85,11 @@ def parseArguments():
         metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
     queryParser.set_defaults(handler = query)
 
-    rankHelp = "Rank the documents according to similarity to the input phrase."
-    rankParser = subParsers.add_parser("rank",
-        help = rankHelp, description = rankHelp)
-    rankParser.add_argument("phrase", metavar = "PHRASE",
-        help = "The phrase to rank documents against.")
-    rankParser.add_argument("collection", type = Path, nargs = "?",
-        metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
-    rankParser.set_defaults(handler = rank)
-
     dumpHelp = "Dump the positional index for collection."
     dumpParser = subParsers.add_parser("dump",
         help = dumpHelp, description = dumpHelp)
+    dumpParser.add_argument("structure", choices = ["index", "matrix"],
+        help = "Which structure to dump.")
     dumpParser.add_argument("collection", type = Path, nargs = "?",
         metavar = "COLLECTION", default = Path.cwd(), help = collectionHelp)
     dumpParser.set_defaults(handler = dump)
