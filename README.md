@@ -1,9 +1,12 @@
 # Python Document Indexer
 
-A minimal document indexer written in Python. A college assignment.
+A minimal document indexer written in Python. Computes a positional index for a
+document collection and a term document matrix, then allows a ranked query
+based on the index and the matrix. A college assignment.
 
 # Dependencies
 
+- Numpy.
 - Scipy.
 
 # Run
