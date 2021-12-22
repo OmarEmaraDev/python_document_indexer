@@ -152,8 +152,8 @@ class PositionalIndex:
 
     def phraseQuery(self, phrase):
         terms = self.tokenizer(StringIO(phrase))
-        postingsLists = [self.dictionary[term] for term in terms]
-        if len(postingsLists) == 0: return set()
+        postingsLists = [self.dictionary.get(term, None) for term in terms]
+        if len(postingsLists) == 0 or not all(postingsLists): return set()
         firstPostingsList = postingsLists[0]
         if len(postingsLists) == 1: return firstPostingsList.getMatchesForAll()
 
